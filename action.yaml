@@ -1,0 +1,74 @@
+name: Deploy Azure Policy
+description: Deploy and perform cleanup operations on Azure Policy.
+
+inputs:
+  path:
+    description: The path to the root directory of the policy definitions.
+    required: true
+  filter-on-changed-files:
+    description: "Allowed values: true|false. If set to true, the script will only process changed files."
+    required: false
+  pattern:
+    description: Regex pattern to filter which files will be processed.
+    required: false
+  cleanup:
+    description: "Allowed values: true|false. If set to true, the script will remove any assignments or exemptions that is not present in the repository."
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - name: Get Changed Files
+      if: inputs.filter-on-changed-files == 'true'
+      id: changed-files
+      uses: tj-actions/changed-files@v44
+      with:
+        json: true
+        escape_json: false
+        files: |
+          ${{ inputs.path }}/policies/*/definitions/*.json
+          ${{ inputs.path }}/initiatives/*/definitions/*.json
+          ${{ inputs.path }}/policies/*/assignments/*.json
+          ${{ inputs.path }}/initiatives/*/assignments/*.json
+          ${{ inputs.path }}/policies/*/exemptions/*.json
+          ${{ inputs.path }}/initiatives/*/exemptions/*.json
+        separator: "|"
+
+    - name: Install PS Modules
+      uses: climpr/install-psmodules@v0
+      with:
+        modules: |
+          Az.Accounts:3.0.0
+          Az.ResourceGraph:1.0.0
+          Az.Resources:7.1.0
+
+    - name: Deploy Azure Policy
+      shell: pwsh
+      env:
+        path: ${{ inputs.path }}
+        pattern: ${{ inputs.pattern }}
+        filterOnChangedFiles: ${{ inputs.filter-on-changed-files == 'true' }}
+        changedFiles: ${{ steps.changed-files.outputs.all_changed_files }}
+        cleanup: ${{ inputs.cleanup == 'true' }}
+        actionPath: ${{ github.action_path }}
+        debug: ${{ runner.debug }}
+      run: |
+        #* Set-AzurePolicy.ps1
+
+        #* Set debug preference from runner configuration
+        $DebugPreference = [bool]$env:debug ? "Continue" : "SilentlyContinue"
+
+        #* Parse deployment
+        $param = @{
+          Path    = $env:path
+          Pattern = $env:pattern
+          Cleanup = ([bool]::Parse($env:cleanup))
+        }
+
+        #* Append filesToInclude parameter if specified
+        if ([bool]::Parse($env:filterOnChangedFiles)) {
+          $param.Add("FilesToInclude", $($env:filesToInclude | ConvertFrom-Json))
+        }
+
+        & "$($env:actionPath)/src/Set-AzurePolicy.ps1" @param
