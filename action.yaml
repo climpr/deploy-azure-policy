@@ -8,6 +8,13 @@ inputs:
   filter-on-changed-files:
     description: "Allowed values: true|false. If set to true, the script will only process changed files."
     required: false
+  modules:
+    description: "Required. Multiline string. List of the modules to install. Format: <moduleName>:<version>"
+    required: false
+    default: |
+      Az.Accounts:3.0.0
+      Az.ResourceGraph:1.0.0
+      Az.Resources:7.1.0
   pattern:
     description: Regex pattern to filter which files will be processed.
     required: false
@@ -38,10 +45,7 @@ runs:
     - name: Install PS Modules
       uses: climpr/install-psmodules@v1
       with:
-        modules: |
-          Az.Accounts:3.0.0
-          Az.ResourceGraph:1.0.0
-          Az.Resources:7.1.0
+        modules: ${{ inputs.modules }}
 
     - name: Deploy Azure Policy
       shell: pwsh
