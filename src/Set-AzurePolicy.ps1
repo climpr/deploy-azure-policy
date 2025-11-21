@@ -1,4 +1,6 @@
-#Requires -Modules Az.Accounts, Az.ResourceGraph, Az.Resources
+#Requires -Modules @{ ModuleName="Az.Accounts"; ModuleVersion="3.0.0" }
+#Requires -Modules @{ ModuleName="Az.ResourceGraph"; ModuleVersion="1.0.0" }
+#Requires -Modules @{ ModuleName="Az.Resources"; ModuleVersion="7.1.0" }
 
 [CmdletBinding()]
 param (
