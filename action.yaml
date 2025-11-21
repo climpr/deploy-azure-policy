@@ -63,7 +63,7 @@ runs:
         #* Set debug preference from runner configuration
         $DebugPreference = [bool]$env:debug ? "Continue" : "SilentlyContinue"
 
-        #* Parse deployment
+        #* Parse policy deployment
         $param = @{
           Path    = $env:path
           Pattern = $env:pattern
