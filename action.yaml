@@ -9,7 +9,7 @@ inputs:
     description: "Allowed values: true|false. If set to true, the script will only process changed files."
     required: false
   modules:
-    description: "Required. Multiline string. List of the modules to install. Format: <moduleName>:<version>"
+    description: "Multiline string. List of the modules to install. Format: <moduleName>:<version>"
     required: false
     default: |
       Az.Accounts:3.0.0
