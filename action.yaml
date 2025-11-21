@@ -72,7 +72,6 @@ runs:
 
         #* Append filesToInclude parameter if specified
         if ([bool]::Parse($env:filterOnChangedFiles)) {
-          $param.Add("FilesToInclude", $($env:filesToInclude | ConvertFrom-Json))
+          $param.Add("FilesToInclude", $($env:changedFiles | ConvertFrom-Json))
         }
-
         & "$($env:actionPath)/src/Set-AzurePolicy.ps1" @param
